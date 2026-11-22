@@ -1,2 +1,16 @@
+.DS_Store
+.env
+.env.*
+.venv/
 __pycache__/
 *.pyc
+*.docx
+*.pdf
+*.dotx
+!/templates/utm-fcim-compact.dotx
+plan.json
+draft.json
+output/
+reports/
+screenshots/
+.opencode/opencode.local.json

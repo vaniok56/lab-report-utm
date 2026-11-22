@@ -1,104 +1,46 @@
 ---
 name: lab-report-utm
-description: Пишет и оформляет отчёты по лабораторным работам для UTM (Universitatea Tehnică a Moldovei, ф-т FCIM) — готовый .docx + PDF с титульным листом (логотип УТМ, шапка, блок «Выполнил/Проверил», CHIȘINĂU – год), оглавлением, нумерацией, рисунками, таблицами, листингами и библиографией строго по нормам тех. редактирования. Используй этот скилл всегда, когда пользователь просит отчёт / raport / referat / «оформи лабу» / «напиши отчёт по лабораторной» / «сделай титульник», присылает задание лабораторной, код, скриншоты или результаты запуска и хочет получить отчёт, или просит привести существующий отчёт к нормам оформления — даже если слова «скилл», «UTM» или «docx» не прозвучали.
+description: Draft, assemble, and audit university laboratory reports with WordCraft. Use when the user says “write me the report for this lab”, “write a lab report”, “scrie raportul pentru laborator”, “raport de laborator”, “lucrare de laborator”, or an equivalent request in a lab project. Romanian reports by default. Not for generic DOCX editing or implementing lab code alone.
 ---
 
-# Отчёты по лабораторным работам (УТМ, FCIM)
+# UTM lab reports
 
-Скилл превращает задание + код + результаты запуска в готовый отчёт, оформленный по нормам
-(`references/norms.md`). Оформление не делается руками:
-всё, что касается шрифтов, отступов, титула, нумерации и оглавления, зашито в `scripts/build_report.py`.
-Твоя работа — **содержание** (честное, по теме, безличным стилем) и точная передача данных в спецификацию.
-Так оформление получается одинаковым каждый раз, а ты тратишь силы на текст.
+Use the actual course handout and approved example, not a generic UTM standard. Write instructions and handoff in the user's language. The bundled recipe writes Romanian report prose and Romanian section labels; for another report language, adapt the recipe or template. Keep course and student data outside the skill.
 
-## Что постоянно, а что меняется
+## Start
 
-Постоянное лежит в `assets/profile.json` (пользователь должен один раз вписать туда свои ФИО и группу; если там плейсхолдеры «Фамилия Имя» / «XX-000» — сначала спроси их и обнови файл) и подставляется само — не спрашивай об этом:
-студент и группа (из профиля пользователя), факультет «Facultatea Calculatoare, Informatică şi Microelectronică»,
-логотип УТМ, «CHIȘINĂU – <текущий год>».
+If invoked without a request, inspect the current working folder read-only. Look for a handout or plan, source or notebooks, results, and screenshots. Do not search elsewhere for a different lab.
 
-Меняется от отчёта к отчёту — это нужно взять из задания или спросить:
+- If it looks like a lab, name the folder and any identifiable lab number or topic, then ask: “Should I write the report for this lab?” Ask even if the match is obvious.
+- Otherwise, ask which lab the user wants and request its folder path or assignment.
 
-| Поле spec | Что это | Пример |
-|---|---|---|
-| `lab_number` | номер работы | 3 |
-| `discipline` | название дисциплины (на румынском, как в учебном плане) | Tehnici de Programare Aplicată |
-| `discipline_translation` | перевод на язык отчёта (необязательно) | Прикладные методы программирования |
-| `topic` | тема работы | Коллекции данных |
-| `teacher` | должность + инициалы + фамилия | асист. унив. Н.Ворническу |
-| `department` | кафедра (необязательно; факультет постоянный, а кафедра зависит от дисциплины) | Departamentul Informatică şi Ingineria Sistemelor |
-| `lang` | язык отчёта: `ru` (по умолчанию), `ro`, `en` | ru |
+Stop after the question. Do not create, edit, render, or export a report until the user confirms the lab or supplies one.
 
-Если чего-то из этого нет ни в задании, ни в сообщении — задай **один** короткий вопрос со всем недостающим
-списком сразу (не по одному). Кафедру не выдумывай: нет данных — спроси или пропусти строку.
-Язык отчёта = язык, на котором написано задание лабораторной (если неясно — русский, как в эталоне).
-Для `ro`/`en` в профиле стоят предполагаемые написания имени — один раз подтверди их с пользователем.
-Группу/имя меняй, только если пользователь сам сказал (поля `student`, `group` в `meta`).
+### Cover data
 
-## Порядок работы
+If a cover field is missing or contains `___`, `TBD`, or a similar blank, check only the sibling lab folders in the parent directory (`lab1`, `lab2`, and so on) for a confirmed student, group, teacher, course, or year. Do not search the rest of the disk. If the value is absent or conflicting, ask. Never invent cover data. If the run is non-interactive, use a clearly labeled draft instead of a final-looking report.
 
-1. **Собери материалы.** Прочитай задание лабораторной (PDF/DOCX), код студента, скриншоты, вывод программы.
-   Если есть код и его можно запустить — запусти и возьми **настоящий** вывод. Если нужны скриншоты кода или
-   консоли, которых нет, — попроси или предложи вставить код листингом (`code`/`console`).
-   Никогда не придумывай результаты запуска, измерения, графики и источники: отчёт подписывается студентом,
-   выдуманные числа — это подлог и верный способ завалить защиту. Нет данных → скажи, что нужно получить.
-2. **Продумай структуру** по `references/report_content.md` (введение с целью и задачами → главы с разбором и
-   реализацией → результаты → заключение → библиография → приложения). Для кода и программирования — там же
-   шаблон разбора листингов.
-3. **Напиши spec JSON** (формат и все типы блоков — `references/spec_format.md`, живой пример —
-   `templates/example_spec.json`). Положи рядом с изображениями, на которые ссылаются блоки `figure`.
-4. **Собери:**
-   ```bash
-   python <skill>/scripts/build_report.py report_spec.json lab4_report.docx --png-dir qa_png
-   ```
-   Скрипт сам: собирает docx → рендерит через Word (или LibreOffice) → находит страницы заголовков →
-   пересобирает с настоящим полем «Оглавление» и верными номерами → кладёт рядом `lab4_report.pdf`.
-   Нужны `python-docx`, `Pillow`, `PyMuPDF` (`pip install python-docx pillow pymupdf`).
-   Код возврата 2 и «ОШИБКА НОРМ» — два рисунка/таблицы подряд: добавь между ними абзац с пояснением.
-5. **Проверь глазами**, а не только по логу: открой `qa_png/page_01.png` (титул), оглавление и по одной
-   странице каждого типа (рисунок, таблица, листинг). Чек-лист:
-   - логотип слева, шапка справа от него; «RAPORT» → номер → дисциплина → тема; блок «Выполнил/Проверил»
-     у правого края; «CHIȘINĂU – год» внизу;
-   - нет пустых страниц, нет «висячих» заголовков в конце страницы, оглавление помещается, номера страниц верны;
-   - подписи рисунков под рисунком, таблиц над таблицей; ссылки в тексте ведут на существующие номера;
-   - нет предупреждений «?» в тексте (нераскрытые `{fig:...}`), нет первого лица («я», «мы»).
-   Что-то не так → правь spec (а не docx) и пересобирай.
-6. **Отдай пользователю** `.docx` (основной файл) и `.pdf`, одной строкой скажи, что в отчёте, и честно
-   перечисли, что взято из его материалов, а что нужно проверить (например, «листинг 2 — ваш код без правок»).
-   Предупреди о конфликтах эталон/нормы, если они коснулись этого отчёта (см. ниже).
+## Write the report
 
-## Содержание: что делает отчёт «качественным»
+1. **Read the real assignment and collect evidence first.** Make an ordered checklist of every required task/subtask, cover fields, evidence, and attachments. Record observed results and limits. Ask once for missing information; don't invent observations or run supplied code automatically. Never claim an attachment is included when it isn't.
+2. **Write a report, not a filled-in form.** Keep the ordered checklist and evidence inventory in the trusted `plan`. The `draft` contains connected prose: what was done, what the evidence shows, and what follows. Don't print repeated `Cerință / Metodă / Rezultat / Verificare` labels. A table gives exact values; a figure shows evidence or a pattern; prose explains why it matters and what it does not prove. Don't repeat the same data in all three. Follow [the workflow schema](references/workflow.md), then verify claims against the files. Delegate only if requested.
+3. **Compose with WordCraft only.** Use `templates/utm-fcim-compact.dotx` and the build script. Do not hand-build OOXML or use python-docx, pandoc, or LibreOffice. For a different course cover, make a WordCraft template with the same placeholders, paragraph roles, and `UTM Grid` table style. No auto-generated contents and no page per task.
+4. **Build from the shell.** `scripts/build-report.js` starts a confined headless WordCraft server, validates both JSON files, composes, and saves the DOCX. It stages screenshots and the template in a temporary folder, so WordCraft needs no access to the rest of the project. Pass `--pdf` to export A4 PDF.
+5. **Run a final factual audit.** After the build, compare every concrete name, group, teacher, number, count, date, and causal claim against the source files, CSVs, terminal output, and previous-lab cover data. Check the direction of every inverted or normalized series against one known row. Remove or soften anything the evidence does not support. Incomplete cover data, placeholders, or invented facts mean a labeled draft, never a final-looking report.
+6. **Verify layout before delivery.** Inspect task coverage, statement-to-evidence links, exact source, and fields. Render all pages to local files; never load full-page images or batches into the model. Check a single contact sheet and at most two small crops. Missing required screenshots mean a clearly labeled draft. Verify the saved DOCX too.
+7. Save a new DOCX. Never overwrite an existing report or imply submission. If factual or visual checks remain unfinished, say so.
 
-- **Безличный стиль** (норма): «в работе реализовано», «программа выводит», а не «я сделал». Скрипт предупредит
-  о местоимениях первого лица, но не заменит внимательность.
-- Каждый рисунок, таблица, листинг и формула упоминаются в тексте **до** появления (`{fig:id}`, `{tab:id}`,
-  `{lst:id}`, `{eq:id}`), и текст объясняет, *что на них видно и почему это важно* — а не просто «см. рисунок».
-- Не пересказывай задание целиком: коротко формулируй цель и затем показывай, как она достигнута
-  (разбор алгоритма → ключевые фрагменты кода → результат → вывод).
-- Код — в приложение листингом или скриншотом; в основной части — только ключевые фрагменты, которые разбираются.
-- Выводы в заключении проверяемы: что получилось, какие результаты, чему научились, подтверждено ли ожидание.
-- Библиография (норма: «не забудьте ссылки»): только реальные источники — методичка лабораторной, официальная
-  документация, учебники, которые ты точно знаешь. Каждый источник процитирован в тексте через `{src:id}`.
-  Не уверен в выходных данных — укажи URL документации и дату обращения или оставь источник, который дал пользователь.
+A typical build:
 
-## Нормы и расхождения с эталоном
+```sh
+node "<skill-dir>/scripts/build-report.js" \
+  --plan plan.json --draft draft.json \
+  --out "/absolute/path/Lab3 Report.docx" \
+  --pdf "/absolute/path/Lab3 Report.pdf"
+```
 
-Полный перечень — `references/norms.md`. Вкратце, чтобы не удивляться результату: A4, поля 2/2/3/1,5 см,
-Times New Roman 12, интервал 1,5, абзацный отступ 1,5 см, justify; заголовки глав — Arial 14 bold
-капсом по центру, каждая глава с новой страницы; подзаголовки — Arial 12/11 bold слева с номером 1.1, 1.1.1;
-номер страницы внизу по центру (титул и оглавление считаются, но не нумеруются); подписи рисунков — под
-рисунком по центру, таблиц — над таблицей справа; номера — по главам («Рисунок 2.1.1»); формулы по центру
-с номером справа.
+`plan.json` and `draft.json` are temporary working files based on the schema in `references/workflow.md`. Delete them or leave them with the lab sources; do not add student data to the skill.
 
-Где эталон и нормы расходятся, скилл следует **нормам** (это требование преподавателя), а титулу — **эталону**:
-подпись таблицы справа (в эталоне слева), нумерация «глава.подраздел.номер» (в эталоне сквозная), блок
-библиографии (в эталоне его нет). Если пользователю нужен вариант как в эталоне — `meta.table_caption_align: "left"`.
-Размеры шрифта на титуле берутся из эталона, а не из норм (в нормах 16/22/16 pt — это общая схема, эталон
-выверен и принят).
+`Concluzii`, `Bibliografie`, and `Anexă` each start on a separate page. Each section flows if it is longer than a page. Omitted sections add no pages. The cover counts as page 1 but the first visible folio is 2.
 
-## Если сборщик недоступен
-
-Нет Word и LibreOffice — отчёт всё равно соберётся, но без номеров страниц в оглавлении (скрипт скажет об
-этом): попроси пользователя открыть docx в Word и обновить оглавление (ПКМ → «Обновить поле» → всё
-оглавление). Нет Python-пакетов — установи их через `pip`. Не пытайся «дооформить» docx руками через python-docx:
-любая правка вне spec потеряется при следующей сборке и ломает единообразие.
+Use the compact FCIM template as an example, not as proof of official compliance. Confirm instructor, department, signoff labels, and cover order against the current handout.
