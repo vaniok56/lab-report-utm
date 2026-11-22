@@ -73,6 +73,19 @@ Do the factual audit before layout. Compare the report against the source files,
 - Confirm figures and tables show what the prose says; captions describe the visible result.
 - Treat `___`, `TBD`, `[[...]]`, invented names, and unsupported numbers as blockers. Use a labeled draft if the information cannot be confirmed.
 
+### Visual audit
+
+Run this after the factual audit. Give the reviewer the PDF, all page renders, the original screenshots, and this checklist. The reviewer is read-only.
+
+- Every screenshot matches an original file and is a real capture, not an image rendered from text.
+- No command, column, caption, or table edge is cut off.
+- Every caption sits with its figure or table.
+- No stranded heading, blank page, or near-empty page.
+- Cover fields, folios, and section starts are correct.
+- Figures and tables match the prose.
+
+Return only `p.N: blocker` findings. Fix them, rebuild, re-render only changed pages, and repeat until none remain.
+
 Then check layout:
 
 - Use `wordcraft-cli info`, `wordcraft-cli inspect`, and `wordcraft-cli text` on the saved DOCX. Check section geometry, task order, absence of placeholders, table cell styles, verified PNGs, and exact source text including case and indentation. Caption numbers come from Word `SEQ` fields.
