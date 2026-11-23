@@ -74,13 +74,15 @@ If cover fields are missing or contain placeholders, the skill checks only sibli
 
 The build requires department. If no same-course lab provides it, the skill asks whether to use "Departamentul Ingineria Software" or another department. It never applies that value automatically.
 
+Use the filename from the handout or a previous lab. If neither gives one, use `Lab<N>_<subject short form>_<Surname>_<Name>_<Group>`; ask only for parts that remain unknown.
+
 The agent prepares two temporary JSON files, `plan.json` and `draft.json`, then runs:
 
 ```sh
 node "<skill-dir>/scripts/build-report.js" \
   --plan plan.json --draft draft.json \
-  --out "/absolute/path/<filename-from-handout>.docx" \
-  --pdf "/absolute/path/<filename-from-handout>.pdf"
+  --out "/absolute/path/Lab<N>_<subject>_<Surname>_<Name>_<Group>.docx" \
+  --pdf "/absolute/path/Lab<N>_<subject>_<Surname>_<Name>_<Group>.pdf"
 ```
 
 The script validates both files before opening WordCraft, stages the template and screenshots in a temporary folder, builds the DOCX, and optionally exports PDF. It refuses to overwrite an existing report. Missing screenshots or incomplete cover data stop a normal build. `allowDraft:true` produces a clearly labeled work copy with missing cover fields left blank instead. `--keep-temp` keeps the staging folder for debugging.

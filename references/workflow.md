@@ -43,7 +43,7 @@ Give it the actual ordered IDs and allowed evidence IDs for each task, plus veri
 
 ## 2. Build
 
-Name `--out` as the handout requires. If no convention is given, ask. Do not use a generic filename.
+Name `--out` from the handout or a previous lab. If neither gives one, use `Lab<N>_<subject short form>_<Surname>_<Name>_<Group>`; ask only for parts that remain unknown. Do not use a generic filename.
 
 From any shell:
 
@@ -51,8 +51,8 @@ From any shell:
 node "<skill-dir>/scripts/build-report.js" \
   --plan /absolute/plan.json \
   --draft /absolute/draft.json \
-  --out "/absolute/path/<filename-from-handout>.docx" \
-  --pdf "/absolute/path/<filename-from-handout>.pdf"
+  --out "/absolute/path/Lab<N>_<subject>_<Surname>_<Name>_<Group>.docx" \
+  --pdf "/absolute/path/Lab<N>_<subject>_<Surname>_<Name>_<Group>.pdf"
 ```
 
 Options: `--template` for a course-specific `.dotx`; `--author` for tracked-change attribution; `--keep-temp` to retain staged files. `WORDCRAFT_CLI` overrides the executable name or path.
