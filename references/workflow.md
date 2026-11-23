@@ -4,7 +4,9 @@ The skill runs on any coding agent that can read files and run shell commands. W
 
 Use `templates/utm-fcim-compact.dotx` for the compact FCIM house style, not as a claim of official compliance for every course. The cover is logo-free and uses fixed UTM and FCIM text. Confirm instructor, department, signoff labels, and cover order against the current handout. If the course requires a different design, make and verify a separate WordCraft template with the same placeholders, paragraph roles, and `UTM Grid` table style.
 
-If a cover field is missing or contains `___`, `TBD`, or a similar blank, inspect only the sibling lab folders in the parent directory (`lab1`, `lab2`, and so on) for confirmed values. Do not search the rest of the disk. If the value is absent or conflicting, ask. Never invent cover data.
+The bundled FCIM example uses "Departamentul Ingineria Software", but it is not a default. Use the department from the handout or a same-course previous lab. If neither gives one, ask whether to use the included value or another department.
+
+If a cover field is missing or contains `___`, `TBD`, or a similar blank, inspect only the sibling lab folders in the parent directory (`lab1`, `lab2`, and so on) for confirmed values. Use only values from the same course. Do not search the rest of the disk. If the value is absent or conflicting, ask. Never invent cover data.
 
 ## 1. Prepare two files
 
@@ -14,10 +16,11 @@ Write `plan.json` and `draft.json` in a scratch folder. Keep the plan ordered an
 
 | `plan` field | Shape and rule |
 |---|---|
-| `cover` | Strings `course`, `lab`, `topic`, `studentLabel`, `student`, `teacherLabel`, `teacher`, `year`; optional `department`. `lab` is the bare number (e.g. `"3"`); the template already prints `nr.`. Use confirmed identity/titles; omit unknown optional department. |
+| `cover` | Strings `course`, `lab`, `topic`, `department`, `studentLabel`, `student`, `teacherLabel`, `teacher`, `year`. `department` is required by the build. `lab` is the bare number (e.g. `"3"`); the template already prints `nr.`. Use exact teacher titles and confirmed identity values. |
 | `tasks` | Ordered `[{id, title, requirement, evidence:[id, …], command?}]` from the handout. `requirement` is for verification, not printed as a repeated field. `command` is an observed command or a verbatim listing, not instructions to execute. |
 | `evidence` | Map `id → {kind:"artifact"|"screenshot", checked:true, label, task?, path?, caption?, display?}`. The reviewer sets `checked:true` only after inspection. Screenshot entries need an absolute PNG path, task ID, and factual caption. `display` optionally supplies final `width`/`height` in points and fractional `top`/`bottom`/`left`/`right` crop. Crop only unused space or non-evidence. This is not redaction: the original bytes remain in the DOCX. If sensitive material is present, use an approved, safely sanitized copy and keep the original private. Reconstructed output is an artifact, not a screenshot. |
-| `screenshotTasks` | Task IDs where a real screenshot is required, or `[]`. Missing screenshots or incomplete cover fields stop normal builds. `allowDraft:true` explicitly permits a prominently labeled work copy. |
+| `screenshotTasks` | Task IDs where a real screenshot is required, or `[]`. Missing screenshots or incomplete cover fields stop normal builds. |
+| `allowDraft` | Optional top-level boolean. `true` permits a prominently labeled work copy with missing screenshots or cover fields. Put it at the top level, not inside `cover`. |
 | `tables` | `[{id, after:"intro"|taskId, caption, widths:[…], values:[[headers],…]}]`. Widths are percentages summing to 100. Use measured results from verified evidence, give units, and choose widths based on actual content. |
 | `inlineCode` | Optional confirmed identifiers/filenames to format in Courier New in prose. Not freeform markup. |
 | `sources` | Optional array of verified references in citation order (without number prefixes). |
@@ -36,9 +39,11 @@ Ask the writer for JSON only:
 }
 ```
 
-Give it the actual ordered IDs and allowed evidence IDs for each task, plus verified facts. Every task needs at least one checked evidence ID; use a non-visual artifact when no screenshot proves the step. Use one to three connected paragraphs per task. Each displayed figure/table must have one inline `{figure:id}` or `{table:id}` mention in its own section; the recipe assigns the numbers. Non-visual sources (CSV, transcript, source file) can support claims without being printed as pictures. Never number figures or tables manually. Avoid unsupported conclusions and repeated concrete values. Review assertions yourself; the gate checks shape, coverage, and provenance declarations, not truth.
+Give it the actual ordered IDs and allowed evidence IDs for each task, plus verified facts. Every task needs at least one checked evidence ID; use a non-visual artifact when no screenshot proves the step. Use one to three connected paragraphs per task. Write impersonal Romanian. Avoid first person singular and plural. Each displayed figure/table must have one inline `{figure:id}` or `{table:id}` mention in its own section; the recipe assigns the numbers. Non-visual sources (CSV, transcript, source file) can support claims without being printed as pictures. Never number figures or tables manually. Avoid unsupported conclusions and repeated concrete values. Review assertions yourself; the gate checks shape, coverage, and provenance declarations, not truth.
 
 ## 2. Build
+
+Name `--out` as the handout requires. If no convention is given, ask. Do not use a generic filename.
 
 From any shell:
 
@@ -46,8 +51,8 @@ From any shell:
 node "<skill-dir>/scripts/build-report.js" \
   --plan /absolute/plan.json \
   --draft /absolute/draft.json \
-  --out "/absolute/path/Lab3 Report.docx" \
-  --pdf "/absolute/path/Lab3 Report.pdf"
+  --out "/absolute/path/<filename-from-handout>.docx" \
+  --pdf "/absolute/path/<filename-from-handout>.pdf"
 ```
 
 Options: `--template` for a course-specific `.dotx`; `--author` for tracked-change attribution; `--keep-temp` to retain staged files. `WORDCRAFT_CLI` overrides the executable name or path.
@@ -89,6 +94,7 @@ Return only `p.N: blocker` findings. Fix them, rebuild, re-render only changed p
 Then check layout:
 
 - Use `wordcraft-cli info`, `wordcraft-cli inspect`, and `wordcraft-cli text` on the saved DOCX. Check section geometry, task order, absence of placeholders, table cell styles, verified PNGs, and exact source text including case and indentation. Caption numbers come from Word `SEQ` fields.
+- Check the saved DOCX with formatting marks. Reject manual tabs, repeated spaces, and blank paragraphs used as spacers outside the code appendix.
 - Render every page with `wordcraft-cli render <docx> <out.png> --page N --scale 0.8 --strict`. Keep images on disk. Build one contact sheet (max 1,200 px on its longest side); inspect up to two small crops only if a page looks wrong. Do not load full-page renders or base64 into the conversation.
 - Recheck figures, tables, and headings for stranded captions. An image and its editable caption share one keep-lines paragraph. Short table rows request no row split and keep-with-next.
 - Make at most one targeted pagination pass, then rebuild. Don't shrink template fonts or add page breaks to every task. Do not delete required evidence or a table to fix pagination; correct the block.

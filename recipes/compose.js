@@ -11,17 +11,33 @@ function validateReport(plan, draft) {
   const keys = (v, names) => v && typeof v === "object" &&
     Object.keys(v).sort().join() === names.split(" ").sort().join();
   if (!keys(draft, "intro tasks conclusion") || !Array.isArray(draft.tasks)) fail("Invalid draft shape");
-  const cover = ["course", "lab", "topic", "studentLabel", "student", "teacherLabel", "teacher", "year"];
+  if (!plan.cover || typeof plan.cover !== "object" || Array.isArray(plan.cover)) fail("Invalid cover");
+  for (const [name, value] of Object.entries({
+    tables: plan.tables,
+    screenshotTasks: plan.screenshotTasks,
+    sources: plan.sources,
+    appendix: plan.appendix,
+    inlineCode: plan.inlineCode,
+  })) {
+    if (value !== undefined && !Array.isArray(value)) fail(`${name} must be an array`);
+  }
+  const cover = ["course", "lab", "topic", "department", "studentLabel",
+    "student", "teacherLabel", "teacher", "year"];
   const incompleteCover = [];
+  if (!plan.cover?.department && plan.allowDraft !== true) {
+    fail("Cover department is required; use the handout, a same-course lab, or ask");
+  }
   for (const k of cover) {
-    line(plan.cover?.[k], `Cover ${k}`);
-    if (/_{3,}|\bTBD\b/i.test(plan.cover[k])) incompleteCover.push(k);
+    const value = plan.cover?.[k];
+    if (!value) {
+      if (plan.allowDraft !== true) fail(`Cover ${k} is required`);
+      incompleteCover.push(k);
+      continue;
+    }
+    line(value, `Cover ${k}`);
+    if (/_{3,}|\bTBD\b/i.test(value)) incompleteCover.push(k);
   }
-  if (!/^\d{4}$/.test(plan.cover.year)) fail("Year must be four digits");
-  if (plan.cover.department) {
-    line(plan.cover.department, "Department");
-    if (/_{3,}|\bTBD\b/i.test(plan.cover.department)) incompleteCover.push("department");
-  }
+  if (plan.cover?.year && !/^\d{4}$/.test(plan.cover.year)) fail("Year must be four digits");
   if (incompleteCover.length && plan.allowDraft !== true) {
     fail(`Incomplete cover fields: ${incompleteCover.join(", ")}; ask for confirmed data or set allowDraft`);
   }

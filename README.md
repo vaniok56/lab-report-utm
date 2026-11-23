@@ -70,18 +70,20 @@ With no request:
 
 it inspects the current folder. If it finds a lab, it names it and asks before writing. Otherwise it asks which lab to use. It writes nothing until you confirm.
 
-If cover fields are missing or contain placeholders, the skill checks only sibling lab folders (`lab1`, `lab2`, and so on). If the value is absent or conflicting, it asks. It does not search the rest of the disk and does not invent student or teacher data.
+If cover fields are missing or contain placeholders, the skill checks only sibling lab folders (`lab1`, `lab2`, and so on) for the same course. If the value is absent or conflicting, it asks. It does not search the rest of the disk and does not invent student or teacher data.
+
+The build requires department. If no same-course lab provides it, the skill asks whether to use "Departamentul Ingineria Software" or another department. It never applies that value automatically.
 
 The agent prepares two temporary JSON files, `plan.json` and `draft.json`, then runs:
 
 ```sh
 node "<skill-dir>/scripts/build-report.js" \
   --plan plan.json --draft draft.json \
-  --out "/absolute/path/Lab3 Report.docx" \
-  --pdf "/absolute/path/Lab3 Report.pdf"
+  --out "/absolute/path/<filename-from-handout>.docx" \
+  --pdf "/absolute/path/<filename-from-handout>.pdf"
 ```
 
-The script validates both files before opening WordCraft, stages the template and screenshots in a temporary folder, builds the DOCX, and optionally exports PDF. It refuses to overwrite an existing report. Missing screenshots or incomplete cover data stop a normal build. `allowDraft:true` produces a clearly labeled work copy instead. `--keep-temp` keeps the staging folder for debugging.
+The script validates both files before opening WordCraft, stages the template and screenshots in a temporary folder, builds the DOCX, and optionally exports PDF. It refuses to overwrite an existing report. Missing screenshots or incomplete cover data stop a normal build. `allowDraft:true` produces a clearly labeled work copy with missing cover fields left blank instead. `--keep-temp` keeps the staging folder for debugging.
 
 ## Final audit
 
